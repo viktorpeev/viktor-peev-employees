@@ -30,54 +30,50 @@ function App() {
   }
 
   const findCommonProjects = () => {
-    const projects = {};
+    const employeesByProject = {};
 
     fileData.forEach((project) => {
       const { EmpID, ProjectID, DateFrom, DateTo } = project;
-
-      if (!(ProjectID in projects)) {
-        projects[ProjectID] = [];
-      }
-
+  
       const parsedDateFrom = parseDate(DateFrom);
       const parsedDateTo = DateTo ? parseDate(DateTo) : new Date(); //checks if null
-
+  
       if (parsedDateFrom && parsedDateTo) {
-        projects[ProjectID].push({
+        if (!employeesByProject[ProjectID]) {
+          employeesByProject[ProjectID] = [];
+        }
+  
+        employeesByProject[ProjectID].push({
           EmpID,
           DateFrom: parsedDateFrom,
           DateTo: parsedDateTo,
         });
       }
     });
-
+  
     const commonProjects = [];
-
-    Object.keys(projects).forEach((projectID) => {
-      const employees = projects[projectID];
-      for (let i = 0; i < employees.length; i++) {
-        for (let j = i + 1; j < employees.length; j++) {
-          const employee1 = employees[i];
-          const employee2 = employees[j];
-
-          if (employee1.ProjectID === employee2.ProjectID) {
-            const days = differenceInDays(
-              Math.min(employee1.DateTo, employee2.DateTo),
-              Math.max(employee1.DateFrom, employee2.DateFrom)
-            );
-
-            commonProjects.push({
-              EmpID1: employee1.EmpID,
-              EmpID2: employee2.EmpID,
-              ProjectID: projectID,
-              DaysWorked: days,
-            });
-          }
-        }
+  
+    Object.keys(employeesByProject).forEach((projectID) => {
+      const employees = employeesByProject[projectID];
+  
+      for (let i = 0; i < employees.length - 1; i++) {
+        const employee1 = employees[i];
+        const employee2 = employees[i+1];
+  
+          const days = differenceInDays(
+            Math.min(employee1.DateTo, employee2.DateTo),
+            Math.max(employee1.DateFrom, employee2.DateFrom)
+          );
+  
+          commonProjects.push({
+            EmpID1: employee1.EmpID,
+            EmpID2: employee2.EmpID,
+            ProjectID: projectID,
+            DaysWorked: days,
+          });
       }
     });
-
-
+  
     setCommonProjects(commonProjects);
   }
 
