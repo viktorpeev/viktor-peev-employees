@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import Papa from "papaparse";
 import { differenceInDays, parse } from "date-fns";
+import './App.css'
 
 function App() {
   const [fileData, setFileData] = useState([]);
   const [commonProjects, setCommonProjects] = useState([]);
 
-  function handleFileUpload(e) {
+  const handleFileUpload = (e) => {
     const file = e.target.files[0];
 
     Papa.parse(file, {
@@ -17,7 +18,7 @@ function App() {
     });
   }
 
-  function parseDate(value) {
+  const parseDate = (value) => {
     const formats = ['yyyy-MM-dd', 'MM/dd/yyyy', 'dd/MM/yyyy', 'dd.MM.yyyy'];
     for (let i = 0; i < formats.length; i++) {
       const date = parse(value, formats[i], new Date());
@@ -28,7 +29,7 @@ function App() {
     return null;
   }
 
-  function findCommonProjects() {
+  const findCommonProjects = () => {
     const projects = {};
 
     fileData.forEach((project) => {
@@ -54,17 +55,17 @@ function App() {
 
     Object.keys(projects).forEach((projectID) => {
       const employees = projects[projectID];
-      for(let i=0; i<employees.length; i++) {
-        for(let j=i+1; j<employees.length; j++) {
+      for (let i = 0; i < employees.length; i++) {
+        for (let j = i + 1; j < employees.length; j++) {
           const employee1 = employees[i];
           const employee2 = employees[j];
-    
+
           if (employee1.ProjectID === employee2.ProjectID) {
             const days = differenceInDays(
               Math.min(employee1.DateTo, employee2.DateTo),
               Math.max(employee1.DateFrom, employee2.DateFrom)
             );
-    
+
             commonProjects.push({
               EmpID1: employee1.EmpID,
               EmpID2: employee2.EmpID,
@@ -75,15 +76,16 @@ function App() {
         }
       }
     });
-    
+
 
     setCommonProjects(commonProjects);
   }
 
   return (
     <div>
+      <h1>TASK:<br/> Pair of employees who have worked together</h1>
+      <span>Select .csv file format  </span>
       <input type="file" onChange={handleFileUpload} />
-      <button onClick={findCommonProjects}>Find Common Projects</button>
       <table>
         <thead>
           <tr>
@@ -104,6 +106,9 @@ function App() {
           ))}
         </tbody>
       </table>
+      <div className="buttonContainer">
+        <button onClick={findCommonProjects}>Go</button>
+      </div>
     </div>
   );
 }
